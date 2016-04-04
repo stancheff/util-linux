@@ -329,7 +329,7 @@ err:
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uint64_t strtou64_or_err(const char *str, const char *errmesg)
+uint64_t strtou64_base_or_err(int base, const char *str, const char *errmesg)
 {
 	uintmax_t num;
 	char *end = NULL;
@@ -350,6 +350,10 @@ err:
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
+uint64_t strtou64_or_err(const char *str, const char *errmesg)
+{
+	return strtou64_base_or_err(10, str, errmesg);
+}
 
 double strtod_or_err(const char *str, const char *errmesg)
 {

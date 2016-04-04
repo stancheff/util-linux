@@ -111,6 +111,20 @@ blkdiscard_SOURCES = sys-utils/blkdiscard.c lib/monotonic.c
 blkdiscard_LDADD = $(LDADD) libcommon.la $(REALTIME_LIBS)
 endif
 
+if BUILD_BLKREPORT
+sbin_PROGRAMS += blkreport
+dist_man_MANS += sys-utils/blkreport.8
+blkreport_SOURCES = sys-utils/blkreport.c
+blkreport_LDADD = $(LDADD) libcommon.la $(REALTIME_LIBS)
+endif
+
+if BUILD_BLKZONECMD
+sbin_PROGRAMS += blkzonecmd
+dist_man_MANS += sys-utils/blkzonecmd.8
+blkzonecmd_SOURCES = sys-utils/blkzonecmd.c
+blkzonecmd_LDADD = $(LDADD) libcommon.la $(REALTIME_LIBS)
+endif
+
 if BUILD_LDATTACH
 usrsbin_exec_PROGRAMS += ldattach
 dist_man_MANS += sys-utils/ldattach.8

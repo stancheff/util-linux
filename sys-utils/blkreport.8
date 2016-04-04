@@ -1,0 +1,96 @@
+.TH BLKREPORT 5 "March 2016" "util-linux" "System Administration"
+.SH NAME
+blkreport \- report zones on a device
+.SH SYNOPSIS
+.B blkreport
+[options]
+.RB [ \-o
+.IR offset ]
+.RB [ \-l
+.IR report length ]
+.I device
+.SH DESCRIPTION
+.B blkreport
+is used to report device zone information.  This is useful for
+zoned devices that support the ZAC or ZBC command set.
+Unlike
+.BR sg_rep_zones (8) ,
+this command is can be used on any block device.
+.PP
+By default,
+.B blkreport
+will report from the start of the block device upto 512k bytes of the
+zone report (~8160 zones].  Options may be used to modify
+this behavior based on the starting zone or size of the report,
+as explained below.
+.PP
+The
+.I device
+argument is the pathname of the block device.
+.PP
+.SH OPTIONS
+The
+.I offset
+and
+.I length
+arguments may be followed by the multiplicative suffixes KiB (=1024),
+MiB (=1024*1024), and so on for GiB, TiB, PiB, EiB, ZiB and YiB (the "iB" is
+optional, e.g., "K" has the same meaning as "KiB") or the suffixes
+KB (=1000), MB (=1000*1000), and so on for GB, TB, PB, EB, ZB and YB.
+.TP
+.BR \-o , " \-\-zone \fIzone-lba"
+Byte offset into the device from which to start the block report.
+The provided value will be aligned to the device sector size.
+The default value is zero.
+.TP
+.BR \-l , " \-\-length \fIlength"
+The number of bytes to allocate for the report from the block device.
+The provided value will be aligned to the device sector size.
+If the specified value will be limited to the range of 512 bytes to 512 k-bytes.
+.TP
+.BR \-a , " \-\-ata"
+Issue ATA passthrough commands to the connected device. This option is to
+enable retrieving zone reports from SATA devices connected via SAS HBA's
+which have old firmware and will not translate ZBC commands to ZAC commands
+internally.
+Note that the resulting report will be little-endian and should be properly
+detected by
+.B blkreport.
+.TP
+.BR \-r , " \-\-option"
+Zoned devices support various reports. The default report lists all zones,
+however more specific reports can be specified. Available reports are:
+.BR 0 \- non seq. and reset (default)
+.BR 1 \- empty
+.BR 2 \- open implicit
+.BR 3 \- open explicit
+.BR 4 \- closed
+.BR 5 \- full
+.BR 6 \- read only
+.BR 7 \- offline
+.BR 0x10 \- reset
+.BR 0x11 \- non sequential
+.BR 0x3f \- non write pointer zones
+.TP
+.BR \-v , " \-\-verbose"
+Display the aligned values of
+.I offset
+and
+.IR length .
+.TP
+.BR \-V , " \-\-version"
+Display version information and exit.
+.TP
+.BR \-h , " \-\-help"
+Display help text and exit.
+.SH AUTHOR
+.MT shaun.tancheff@seagate.com
+Shaun Tancheff
+.ME
+.SH SEE ALSO
+.BR sg_rep_zones (8)
+.SH AVAILABILITY
+The blkreport command is part of the util-linux package and is available
+.UR ftp://\:ftp.kernel.org\:/pub\:/linux\:/utils\:/util-linux/
+Linux Kernel Archive
+.UE .
