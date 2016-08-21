@@ -93,6 +93,7 @@ libblkid_la_SOURCES = \
 	libblkid/src/superblocks/vmfs.c \
 	libblkid/src/superblocks/vxfs.c \
 	libblkid/src/superblocks/xfs.c \
+	libblkid/src/superblocks/zdm.c \
 	libblkid/src/superblocks/zfs.c \
 	\
 	libblkid/src/topology/topology.c \
