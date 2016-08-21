@@ -1,0 +1,87 @@
+.TH BLKZONECMD 5 "March 2016" "util-linux" "System Administration"
+.SH NAME
+blkzonecmd \- send zone commands to a zoned (SMR) device
+.SH SYNOPSIS
+.B blkzonecmd
+[options]
+.RB [ \-z
+.IR zone ]
+.I [\-o] or [\-c] or [\-r]
+.I device
+.SH DESCRIPTION
+.B blkzonecmd
+is used to modify the state of a zone.  This is useful for
+zoned devices that support the ZAC or ZBC command set.
+Unlike
+.BR sg_zone (8) ,
+this command is can be used on any block device.
+.PP
+By default,
+.B blkzonecmd
+will operate on the zone at device logical sector 0. Options may be used to
+modify this behavior as well as specify the operation to be performed on
+the zone, as explained below.
+.PP
+The
+.I device
+argument is the pathname of the block device.
+.PP
+.SH OPTIONS
+The
+.I zone
+argument may be followed by the multiplicative suffixes KiB (=1024),
+MiB (=1024*1024), and so on for GiB, TiB, PiB, EiB, ZiB and YiB (the "iB" is
+optional, e.g., "K" has the same meaning as "KiB") or the suffixes
+KB (=1000), MB (=1000*1000), and so on for GB, TB, PB, EB, ZB and YB.
+As zones were originally required to be sized as a power of 2 logical
+sectors this still is the most common layout. The 0x prefix can also be
+used to specify the zone to be operated on.
+.TP
+.BR \-z , " \-\-zone \fIoffset"
+The zone to be operated on specified as a sector offset.
+The provided offset in sector units should match the start of a zone.
+The default value is zero.
+.TP
+.BR \-o , " \-\-open"
+Send an Open Zone command. Advise media that a zone may be written. On
+success the zone state condition will be advanced to Open Explicit
+.TP
+.BR \-c , " \-\-close"
+Send an Close Zone command. Advise media that a zone may/shall not be
+written to.
+.TP
+.BR \-f , " \-\-finish"
+Send an Finish Zone command. This has the effect of marking a zone full.
+For a Host Managed drive this will move the effective write pointer to
+the end of the zone and all reads commands will succeed. The data that was
+not written to since the last time the zone was EMPTY (reset) will return
+the subsitute data pattern (0's by default).
+.TP
+.BR \-r , " \-\-reset"
+Send a Reset Zone command. On success all data in the zone will be
+deleted.
+.TP
+.BR \-a , " \-\-all"
+Issue the command to all zones on the device.
+.B blkzonecmd.
+.TP
+.BR \-v , " \-\-verbose"
+Display the aligned values of
+.I zone
+.TP
+.BR \-V , " \-\-version"
+Display version information and exit.
+.TP
+.BR \-h , " \-\-help"
+Display help text and exit.
+.SH AUTHOR
+.MT shaun.tancheff@seagate.com
+Shaun Tancheff
+.ME
+.SH SEE ALSO
+.BR sg_zone (8)
+.SH AVAILABILITY
+The blkzonecmd command is part of the util-linux package and is available
+.UR ftp://\:ftp.kernel.org\:/pub\:/linux\:/utils\:/util-linux/
+Linux Kernel Archive
+.UE .
