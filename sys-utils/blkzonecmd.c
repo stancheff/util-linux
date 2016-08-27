@@ -137,6 +137,7 @@ int main(int argc, char **argv)
 	uint32_t act = ZONE_ACTION_OPEN;
 	int fua = 0;
 	int rc = 0;
+	int all = 0;
 
 	static const struct option longopts[] = {
 	    { "help",      0, 0, 'h' },
@@ -157,7 +158,7 @@ int main(int argc, char **argv)
 	textdomain(PACKAGE);
 	atexit(close_stdout);
 
-	while ((c = getopt_long(argc, argv, "hVvocFfrz:", longopts, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, "ahVvocFfrz:", longopts, NULL)) != -1) {
 		switch(c) {
 		case 'h':
 			usage(stdout);
@@ -180,6 +181,9 @@ int main(int argc, char **argv)
 			break;
 		case 'r':
 			act = ZONE_ACTION_RESET;
+			break;
+		case 'a':
+			all = 1;
 			break;
 		case 'F':
 			fua = 1;
@@ -234,11 +238,13 @@ int main(int argc, char **argv)
 	case ZONE_ACTION_OPEN:
 	case ZONE_ACTION_RESET:
 		za.zone_locator_lba = zone_lba;
-		za.all_zones = 0;
+		za.all_zones = all;
 		if (zone_lba == ~0ul) {
 			za.zone_locator_lba = 0;
 			za.all_zones = 1;
 		}
+		if (za.all_zones && za.zone_locator_lba)
+			err(EXIT_FAILURE, _("%s: All expects zone to be 0"), path);
 		za.action = act;
 		za.force_unit_access = fua;
 		rc = ioctl(fd, BLKZONEACTION, &za);
