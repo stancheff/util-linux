@@ -275,6 +275,8 @@ AC_CHECK_HEADERS([security/pam_misc.h],
 #endif
 ])
 
+AC_CHECK_HEADERS([linux/blkzoned.h])
+
 AC_CHECK_HEADERS([security/openpam.h], [], [], [
 #ifdef HAVE_SECURITY_PAM_APPL_H
 #include <security/pam_appl.h>
@@ -1532,6 +1534,14 @@ AM_CONDITIONAL([BUILD_FSFREEZE], [test "x$build_fsfreeze" = xyes])
 UL_BUILD_INIT([blkdiscard], [check])
 UL_REQUIRES_LINUX([blkdiscard])
 AM_CONDITIONAL([BUILD_BLKDISCARD], [test "x$build_blkdiscard" = xyes])
+
+UL_BUILD_INIT([blkreport], [check])
+UL_REQUIRES_LINUX([blkreport])
+AM_CONDITIONAL([BUILD_BLKREPORT], [test "x$build_blkreport" = xyes])
+
+UL_BUILD_INIT([blkreset], [check])
+UL_REQUIRES_LINUX([blkreset])
+AM_CONDITIONAL([BUILD_BLKZONECMD], [test "x$build_blkreset" = xyes])
 
 UL_BUILD_INIT([ldattach], [check])
 UL_REQUIRES_LINUX([ldattach])
