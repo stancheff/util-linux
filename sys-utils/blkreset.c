@@ -38,141 +38,38 @@
 #include <sys/time.h>
 #include <linux/fs.h>
 #include <linux/major.h>
-
-#ifdef HAVE_LINUX_BLKZONED_H
 #include <linux/blkzoned.h>
-#endif
 
-#ifdef HAVE_LIBUDEV
-#include <libudev.h> // udev to find sysfs entries
-#endif
-
+#include "sysfs.h"
 #include "nls.h"
 #include "strutils.h"
 #include "c.h"
 #include "closestream.h"
 #include "monotonic.h"
 
-#ifndef HAVE_LINUX_BLKZONED_H
-
-#include <linux/types.h>
-#include <linux/ioctl.h>
-
-/**
- * struct blk_zone_range - BLKRESETZONE ioctl request
- * @sector: starting sector of the first zone to issue reset write pointer
- * @nr_sectors: Total number of sectors of 1 or more zones to reset
- */
-struct blk_zone_range {
-	__u64		sector;
-	__u64		nr_sectors;
-};
-
-#define BLKRESETZONE	_IOW(0x12, 131, struct blk_zone_range)
-#endif /* HAVE_BLKZONED_H */
-
-static unsigned long read_chunk_size(const char * syspath)
-{
-	FILE *fp;
-	char pathbuf[1024];
-	char fbuf[1024];
-	unsigned long zoned = 0;
-
-	snprintf(pathbuf, sizeof(pathbuf), "%s/queue/chunk_sectors", syspath);
-	fp = fopen(pathbuf, "r");
-	if (fp) {
-		if (fread(fbuf, 1, sizeof(fbuf), fp) > 0) {
-			zoned = strtoul(fbuf, NULL, 10);
-		} else {
-			perror("read failure.");
-		}
-		fclose(fp);
-	} else {
-		perror(pathbuf);
-	}
-	return zoned;
-}
-
-#ifdef HAVE_LIBUDEV
-
-#define DT_BLOCK 0x62 /* pfm? */
-
-/*
- * Mapping /dev/sdXn -> /sys/block/sdX to read the
- *    zoned, and chunk_size files
- *
- *  fstat() -> S_ISBLK()
- *    -> st_dev -> 12 bits major, 20 bits minor
- *
- *  int major_no = major(stat.st_dev);
- *  int minor_no = minor(stat.st_dev);
- *  int block_no = minor_no & ~0x0f
- *
- *  dev_t dev_no makedev(major_no, block_no);
- *
- *  udev_device_new_from_devnum(udev,
- *
- */
 static unsigned long get_zone_size(const char *dname)
 {
-	unsigned long chunk_size = 0;
-	struct stat st_buf;
+	struct sysfs_cxt cxt = UL_SYSFSCXT_EMPTY;
+	dev_t devno = sysfs_devname_to_devno(dname, NULL);
+	int major_no = major(devno);
+	int block_no = minor(devno) & ~0x0f;
+	uint64_t sz;
 
-	if (stat(dname, &st_buf) == 0) {
-		if (S_ISBLK(st_buf.st_mode)) {
-			int major_no = major(st_buf.st_rdev);
-			int minor_no = minor(st_buf.st_rdev);
-			int block_no = minor_no & ~0x0f;
-			dev_t dev_no = makedev(major_no, block_no);
-			struct udev *udev;
-			struct udev_device *dev;
-			const char *syspath;
+	/*
+	 * Mapping /dev/sdXn -> /sys/block/sdX to read the chunk_size entry.
+	 * This method masks off the partition specified by the minor device
+	 * component.
+	 */
+	devno = makedev(major_no, block_no);
+	if (sysfs_init(&cxt, devno, NULL))
+		return 0;
 
-			/* Create the udev object */
-			udev = udev_new();
-			if (!udev) {
-				printf("Can't create udev\n");
-				return 0;
-			}
+	if (sysfs_read_u64(&cxt, "queue/chunk_sectors", &sz) != 0)
+		warnx(_("%s: failed to read chunk size"), dname);
 
-			dev = udev_device_new_from_devnum(udev, DT_BLOCK, dev_no);
-			if (dev) {
-				syspath = udev_device_get_syspath(dev);
-				chunk_size = read_chunk_size(syspath);
-
-				udev_device_unref(dev);
-			}
-			udev_unref(udev);
-		}
-	}
-	return chunk_size;
+	sysfs_deinit(&cxt);
+	return sz;
 }
-
-#else
-#warning "No libudev. Guessing sysfs mounted at /sys"
-
-static unsigned long get_zone_size(const char *dname)
-{
-	unsigned long zsize = 0;
-	char *zname;
-	char *part_no;
-	char sysfs[1024];
-	
-	zname = strrchr(dname, '/');
-	if (zname) {
-		if (*zname == '/')
-			zname++;
-		part_no = zname;
-		while (*part_no && !isdigit(*part_no))
-			part_no++;
-
-		snprintf(sysfs, sizeof(sysfs), "/sys/block/%*.*s",
-			part_no - zname, part_no - zname, zname);
-		zsize = read_chunk_size(sysfs);
-	}
-	return zsize;
-}
-#endif
 
 static void __attribute__((__noreturn__)) usage(FILE *out)
 {
@@ -222,7 +119,7 @@ int main(int argc, char **argv)
 	textdomain(PACKAGE);
 	atexit(close_stdout);
 
-	while ((c = getopt_long(argc, argv, "hVz:c:v", longopts, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, "hVz:c:", longopts, NULL)) != -1) {
 		switch(c) {
 		case 'h':
 			usage(stdout);

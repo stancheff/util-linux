@@ -4,10 +4,10 @@ blkreport \- report zones on a device
 .SH SYNOPSIS
 .B blkreport
 [options]
-.RB [ \-o
-.IR offset ]
-.RB [ \-l
-.IR report length ]
+.RB [ \-z
+.IR zone ]
+.RB [ \-c
+.IR count ]
 .I device
 .SH DESCRIPTION
 .B blkreport
@@ -16,10 +16,9 @@ zoned devices that support the ZAC or ZBC command set.
 .PP
 By default,
 .B blkreport
-will report from the start of the block device upto 512k bytes of the
-zone report (~8160 zones].  Options may be used to modify
-this behavior based on the starting zone or size of the report,
-as explained below.
+will report on up to 4k zones from the start of the block device.
+Options may be used to modify this behavior based on the starting zone or
+size of the report, as explained below.
 .PP
 The
 .I device
@@ -29,24 +28,24 @@ argument is the pathname of the block device.
 The
 .I zone
 and
-.I length
+.I count
 arguments may be followed by the multiplicative suffixes KiB (=1024),
 MiB (=1024*1024), and so on for GiB, TiB, PiB, EiB, ZiB and YiB (the "iB" is
 optional, e.g., "K" has the same meaning as "KiB") or the suffixes
 KB (=1000), MB (=1000*1000), and so on for GB, TB, PB, EB, ZB and YB.
+Additionally the common 0x prefix can be used to specify zone and length in hex.
 .TP
-.BR \-z , " \-\-zone \fIoffset"
-The starting zone to be reported on on specified as a sector offset.
-The provided offset in sector units should match the start of a zone.
+.BR \-z , " \-\-zone \fIoffset", " \-\-offset \fIoffset"
+The starting zone of the report specified as a sector offset.
+The provided offset in sector units (512 bytes) should match the start of a zone.
 The default value is zero.
 .TP
-.BR \-l , " \-\-length \fIlength"
-The number of bytes to allocate for the report from the block device.
-The provided value will be aligned to the device sector size.
-If the specified value will be limited to the range of 512 bytes to 512 k-bytes.
+.BR \-c , " \-\-count \fIcount", " \-\-length \fIcount" 
+The maximum number of zones to be returned by the report from the block device.
+Default is 4006, max is 65536
 .TP
 .BR \-v , " \-\-verbose"
-Display the aligned values of
+Display the number of zones returned in the report.
 .I offset
 and
 .IR length .

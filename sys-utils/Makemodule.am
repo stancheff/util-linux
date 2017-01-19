@@ -118,7 +118,7 @@ blkreport_SOURCES = sys-utils/blkreport.c
 blkreport_LDADD = $(LDADD) libcommon.la $(REALTIME_LIBS)
 endif
 
-if BUILD_BLKZONECMD
+if BUILD_BLKRESET
 sbin_PROGRAMS += blkreset
 dist_man_MANS += sys-utils/blkreset.8
 blkreset_SOURCES = sys-utils/blkreset.c

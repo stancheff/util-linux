@@ -7,10 +7,10 @@ blkreset \- Reset a range of zones
 .RB [ \-z
 .IR zone ]
 .RB [ \-c
-.IR number of zones ]
+.IR count ]
 .SH DESCRIPTION
 .B blkreset
-is used to reset a zone.  This is useful for
+is used to reset one or more zones.  This is useful for
 zoned devices that support the ZAC or ZBC command set.
 Unlike
 .BR sg_reset_wp (8) ,
@@ -33,17 +33,15 @@ argument may be followed by the multiplicative suffixes KiB (=1024),
 MiB (=1024*1024), and so on for GiB, TiB, PiB, EiB, ZiB and YiB (the "iB" is
 optional, e.g., "K" has the same meaning as "KiB") or the suffixes
 KB (=1000), MB (=1000*1000), and so on for GB, TB, PB, EB, ZB and YB.
-As zones were originally required to be sized as a power of 2 logical
-sectors this still is the most common layout. The 0x prefix can also be
-used to specify the zone to be operated on.
+Additionally the common 0x prefix can be used to specify zone and length in hex.
 .TP
-.BR \-z , " \-\-zone \fIoffset"
-The zone to be operated on specified as a sector offset.
-The provided offset in sector units should match the start of a zone.
+.BR \-z , " \-\-zone \fIoffset" , " \-\-offset \fIoffset"
+The starting zone to be operated upon specified as a sector offset.
+The provided offset in sector units (512 bytes) should match the start of a zone.
 The default value is zero.
 .TP
-.BR \-c , " \-\-count \fIzones"
-The number of zones to be reset starting from offset.
+.BR \-c , " \-\-count \fIcount" , " \-\-length \fIcount"
+The number of zones to be reset starting from offset. Default is 1 zone.
 .TP
 .BR \-V , " \-\-version"
 Display version information and exit.
