@@ -26,10 +26,12 @@ extern uint16_t strtox16_or_err(const char *str, const char *errmesg);
 extern int32_t strtos32_or_err(const char *str, const char *errmesg);
 extern uint32_t strtou32_or_err(const char *str, const char *errmesg);
 extern uint32_t strtox32_or_err(const char *str, const char *errmesg);
+extern uint32_t _strtou32_or_err(const char *str, const char *errmesg, int base);
 
 extern int64_t strtos64_or_err(const char *str, const char *errmesg);
 extern uint64_t strtou64_or_err(const char *str, const char *errmesg);
 extern uint64_t strtox64_or_err(const char *str, const char *errmesg);
+extern uint64_t _strtou64_or_err(const char *str, const char *errmesg, int base);
 
 extern double strtod_or_err(const char *str, const char *errmesg);
 
